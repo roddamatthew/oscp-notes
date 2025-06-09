@@ -14,7 +14,7 @@ The more I write, the more I realize how little I know about these things tbh. I
     - Local/Remote file inclusions, file upload vulnerabilities, OS command injections all make sense to me conceptually but I don't know much about them.
     - XSS seems weird. How can we pivot from our browser to changing what JS the server serves?
     - I've messed around with gobuster and BurpSuite before.
-- Linux: 2/5
+- Linux: 3/5
     - I know my way around the linux filesystem
     - I know about user and group permissions. Changing who owns a file doesn't make much sense to me yet. Is there something the owner can do that an equivalently privileged user can't?
     - I don't think `find` has ever actually helped me find something.

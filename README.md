@@ -96,3 +96,26 @@ This is where Linus Torvald and his compadres come in. For exploiting Linux, we 
 - Understanding how to view processes and open ports with `ps` and `netstat`.
 
 These look ok to me. 
+
+## Going from understanding to escalation
+
+Leveraging the understanding from above, we need to exploit stuff. Apparently this can be pretty broad, and depends on the machine in question. Nonetheless, there's a few concepts that deserve to be studied:
+
+- PATH exploitation
+- SUID binary exploitations with GTFObins
+- Weak file permissions
+- cronjob enumerations
+- `sudo -l` exploitations
+- wildcard expansion
+
+The real challenge after reading through these has become clearer, we need to sort the needle from the haystack efficiently. It seems that enumeration is very much the goal, and since the exam is timed, we probably want to do it as efficiently as possible. Some tools to do this are:
+
+- linPEAS
+- LinEnum
+
+We want to start without these first, and understand what they're doing. Once we learn the rules, then we can break them and start to use scripts to shortcut.
+
+# Windows
+
+*Fuck*
+
