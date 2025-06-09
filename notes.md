@@ -6,7 +6,7 @@ Currently, I know a little bit about pentesting. I know that you should start wi
 
 I know a little about sys admin on Linux. I know very little about sys admin on Windows. I know broadly about common web attacks like SQL injections, directory enumeration, etc.
 
-The more I write, the more I reason how little I know about these things tbh. Instead, I've decided to put a little score against each broad concept depicting how much I think I know. Here we go:
+The more I write, the more I realize how little I know about these things tbh. Instead, I've decided to put a little score against each broad concept depicting how much I think I know. Here we go:
 
 - Web: 2/5
 - Linux: 2/5
