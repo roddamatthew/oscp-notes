@@ -220,3 +220,18 @@ printf("Last printf had %d bytes\n", len);
 Hello World 5
 Last printf had 13 bytes
 ```
+
+This gives us a write primitive that we can use to stick shellcode somewhere. With a write primitive we obviously care about whether we can write WHAT we want WHERE we want it:
+- How do we write an arbitrary value? Use the padding mechanism of format strings to print the number of bytes equal to the value you want to write. For example, `%1000x` to write 1000.
+- How do we write to an arbitrary address? Using the argument selector `$` we can reference addresses that are sitting in memory already. This requires us to get the address we want to write to somewhere known however.
+
+With lab03 in mind, we might then consider putting our shellcode into our buffer and then use our write primitive to write over the return address to jump to said shellcode. However in this case there's a pesky `exit()` call just before `main()` returns so we'll have to be a bit more clever.
+
+What do we have to do:
+- Get our shellcode into the buffer:
+    - We're gonna use the %n stuff to do this
+    - I know that the buffer starts at %6$08X
+- Get a control flow redirection to hit it
+    - The only option we have for this is `exit()`
+    - This will use the Procedure Linkage Table (PLT):
+        - 
